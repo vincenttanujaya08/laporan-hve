@@ -1,5 +1,6 @@
 import React, { useState, type ReactNode } from 'react';
 import backgroundImage from './assets/background.webp'; 
+import ReportModal from './reportModal';
 import { 
   LayoutDashboard, FileText, ClipboardList, Settings, 
   Wrench, Monitor, ChevronDown, Plus, BarChart3, 
@@ -44,12 +45,14 @@ const translations = {
 interface DropdownItemProps { icon: ReactNode; label: string; sublabel?: string; theme: string; }
 interface StatCardProps { icon: ReactNode; label: string; value: string | number; iconColor: string; theme: string; }
 interface TaskItemProps { title: string; priority: string; progress: number; date: string; theme: string; }
+interface ActionCardProps {color: string; icon: React.ReactNode; title: string;desc: string; onClick?: () => void;}
 
 const Dashboard: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile toggle
   const [lang, setLang] = useState<'ID' | 'EN'>('ID');
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const t = translations[lang];
   const toggleMenu = (menu: string) => setActiveMenu(activeMenu === menu ? null : menu);
@@ -174,7 +177,7 @@ const Dashboard: React.FC = () => {
             <h2 className={theme === 'light' ? 'text-slate-800 text-lg' : 'text-lg text-white'}>{t.quickAction}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
-            <ActionCard color="bg-blue-600" icon={<FileText size={32}/>} title={t.newFieldReport} desc={t.recordWork} />
+            <ActionCard color="bg-blue-600" icon={<FileText size={32}/>} title={t.newFieldReport} desc={t.recordWork} onClick={() => setIsModalOpen(true)} />
             <ActionCard color="bg-emerald-600" icon={<Edit2 size={32}/>} title={t.newTask} desc={t.planWork} />
             <ActionCard color="bg-fuchsia-600" icon={<Wrench size={32}/>} title={t.orderParts} desc={t.addParts} />
             <ActionCard color="bg-orange-600" icon={<ClipboardList size={32}/>} title={t.newRepair} desc={t.inputRepair} />
@@ -229,6 +232,8 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
       </main>
+        <ReportModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} 
+        theme={theme} lang={lang} />
     </div>
   );
 };
@@ -244,9 +249,9 @@ const DropdownItem: React.FC<DropdownItemProps> = ({ icon, label, sublabel, them
   </button>
 );
 
-const ActionCard = ({ color, icon, title, desc }: any) => (
-  <div className={`${color} p-6 rounded-2xl flex flex-col items-center text-center shadow-lg transition-all hover:scale-[1.02] cursor-pointer border border-white/10`}>
-    <div className="bg-white/20 p-3 rounded-xl mb-4 shadow-inner text-white">{icon}</div>
+const ActionCard: React.FC<ActionCardProps> = ({ color, icon, title, desc, onClick }) => (
+  <div onClick={onClick}  className={`${color} p-6 rounded-2xl flex flex-col items-center text-center shadow-lg transition-all hover:scale-[1.02] cursor-pointer border border-white/10`}>
+    <div  className="bg-white/20 p-3 rounded-xl mb-4 shadow-inner text-white">{icon}</div>
     <h3 className="font-bold text-sm mb-1 uppercase tracking-tight text-white">{title}</h3>
     <p className="text-sm text-white/80 font-medium leading-tight">{desc}</p>
   </div>
