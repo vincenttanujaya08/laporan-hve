@@ -4,5 +4,5 @@ export class UpdateProgressDto {
   @IsNumber()
   @Min(0)
   @Max(100)
-  progres: number;
+  progress: number;
 }

@@ -1,27 +1,29 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
 
 export class CreateRepairDto {
   @IsString()
   @IsNotEmpty()
-  equipment: string;
+  equipment: string; 
 
   @IsString()
   @IsNotEmpty()
-  issue: string;
+  issue: string; 
 
   @IsString()
   @IsNotEmpty()
-  priority: string;
+  @IsIn(['Low', 'Medium', 'High'])
+  priority: string; 
 
   @IsString()
   @IsOptional()
-  status?: string;
+  @IsIn(['Pending', 'In Progress', 'Completed'])
+  status?: string; 
 
   @IsString()
   @IsOptional()
-  technician?: string;
+  technician?: string; 
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  notes?: string; 
 }

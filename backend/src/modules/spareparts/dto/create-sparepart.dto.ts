@@ -1,25 +1,26 @@
-import { IsString, IsNotEmpty, IsNumber, Min, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Min, IsOptional, IsDateString, IsIn } from 'class-validator';
 
 export class CreateSparepartDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name: string; 
 
   @IsNumber()
   @Min(1)
-  quantity: number;
+  quantity: number; 
 
   @IsString()
   @IsNotEmpty()
-  unit: string;
+  unit: string; 
 
   @IsString()
   @IsOptional()
-  description?: string;
+  description?: string; 
 
   @IsString()
   @IsOptional()
-  status?: string;
+  @IsIn(['Pending', 'Ordered', 'Arrived']) 
+  status?: string; 
 
   @IsDateString()
   @IsOptional()
@@ -27,5 +28,5 @@ export class CreateSparepartDto {
 
   @IsDateString()
   @IsOptional()
-  arrivalDate?: string;
+  arrivalDate?: string; 
 }
