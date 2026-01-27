@@ -45,10 +45,10 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang 
   if (!isOpen) return null;
 
   const mt = modalTranslations[lang]
-  const modalBg = theme === 'light' ? 'bg-white' : 'bg-[#254e73]';
+  const modalBg = theme === 'light' ? 'bg-white' : 'bg-[#161b26]';
   const inputBg = theme === 'light' ? 'bg-slate-50' : 'bg-[#121212]';
   const textColor = theme === 'light' ? 'text-slate-900' : 'text-slate-100';
-  const labelColor = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
+  const labelColor = theme === 'light' ? 'text-slate-500' : 'text-white-400';
   const borderColor = theme === 'light' ? 'border-slate-200' : 'border-white/5';
 
   return (
