@@ -1,6 +1,10 @@
 Field Work Report System (HVE Electrical SPIL)
 Sistem manajemen pelaporan pekerjaan lapangan yang mengintegrasikan pencatatan aktivitas harian, pengelolaan tugas, pemantauan perbaikan unit, dan inventaris suku cadang.
 
+dokumentasi : .../docs
+
+contoh local : http://localhost:3000/docs
+
 Persiapan Lingkungan
 Sebelum menjalankan aplikasi, pastikan perangkat Anda telah terpasang:
 
