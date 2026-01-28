@@ -1,18 +1,28 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { ProgressLogsService } from '../services/progress-logs.service';
-import { CreateProgressLogDto } from '../dto/progress-log.dto';
+import { CreateProgressLogDto, UpdateProgressLogDto } from '../dto/progress-log.dto';
 
 @Controller('progress-logs')
 export class ProgressLogsController {
-  constructor(private readonly logService: ProgressLogsService) {}
+  constructor(private readonly service: ProgressLogsService) {}
 
   @Post()
-  async create(@Body() dto: CreateProgressLogDto) {
-    return await this.logService.create(dto);
+  create(@Body() dto: CreateProgressLogDto) {
+    return this.service.create(dto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateProgressLogDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.service.remove(id);
   }
 
   @Get('task/:taskId')
-  async findByTask(@Param('taskId') taskId: string) {
-    return await this.logService.findByTask(taskId);
+  findByTask(@Param('taskId') taskId: string) {
+    return this.service.findByTask(taskId);
   }
 }

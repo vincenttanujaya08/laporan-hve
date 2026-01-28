@@ -7,6 +7,9 @@ export class ProgressLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'date' })
+  date: string;
+
   @Column({ type: 'int' })
   progress: number;
 
