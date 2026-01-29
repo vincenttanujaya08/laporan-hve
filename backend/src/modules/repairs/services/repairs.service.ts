@@ -11,31 +11,31 @@ export class RepairsService {
     private readonly repairRepository: Repository<Repair>,
   ) {}
 
-  // POST
   async create(dto: CreateRepairDto): Promise<Repair> {
     const repair = this.repairRepository.create(dto);
     return await this.repairRepository.save(repair);
   }
 
-  //GET
   async findAll(): Promise<Repair[]> {
     return await this.repairRepository.find({
       order: { createdAt: 'DESC' },
     });
   }
 
-  // PUT/PATCH
   async update(id: string, dto: Partial<CreateRepairDto>): Promise<Repair> {
     const repair = await this.repairRepository.findOneBy({ id });
     if (!repair) {
       throw new NotFoundException(`Repair dengan ID ${id} tidak ditemukan`);
     }
     
+    if (dto.completionDate && !dto.status) {
+      dto.status = 'Selesai';
+    }
+
     Object.assign(repair, dto);
     return await this.repairRepository.save(repair);
   }
 
-  //DEL
   async remove(id: string): Promise<{ message: string }> {
     const result = await this.repairRepository.delete(id);
     if (result.affected === 0) {

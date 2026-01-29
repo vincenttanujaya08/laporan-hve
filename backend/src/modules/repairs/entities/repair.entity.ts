@@ -1,27 +1,37 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, Check } from 'typeorm';
 
 @Entity('repairs')
-@Check('`status` IN ("Pending", "In Progress", "Completed")')
-@Check('`priority` IN ("Low", "Medium", "High")')
-
+@Check('`status` IN ("Barang Diterima", "Sedang Dikerjakan", "Selesai")')
 export class Repair {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index('idx_repairs_equipment')
+  @Index('idx_repairs_unit_name')
   @Column({ length: 255 })
-  equipment: string;
+  unitName: string;
+
+  @Index('idx_repairs_item_name')
+  @Column({ length: 255 })
+  itemName: string;
+
+  @Column({ length: 255 })
+  location: string;
 
   @Column({ type: 'text' })
   issue: string;
 
   @Index('idx_repairs_status')
-  @Column({ type: 'varchar', length: 20, default: 'Pending' })
+  @Column({ type: 'varchar', length: 25, default: 'Barang Diterima' })
   status: string;
 
-  @Index('idx_repairs_priority')
-  @Column({ type: 'varchar', length: 20 })
-  priority: string;
+  @Column({ type: 'date' })
+  entryDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  startDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  completionDate: Date;
 
   @Column({ length: 255, nullable: true })
   technician: string;

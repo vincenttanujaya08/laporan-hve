@@ -1,56 +1,58 @@
-import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRepairDto {
-  @ApiProperty({
-    example: 'AC Ruang Server',
-    description: 'Nama atau identitas equipment yang diperbaiki',
-  })
+  @ApiProperty({ example: 'Linde', description: 'Unit Alat' })
   @IsString()
   @IsNotEmpty()
-  equipment: string; 
+  unitName: string;
 
-  @ApiProperty({
-    example: 'AC tidak dingin',
-    description: 'Deskripsi masalah pada equipment',
-  })
+  @ApiProperty({ example: 'APC Transmisi', description: 'Item Perbaikan' })
   @IsString()
   @IsNotEmpty()
-  issue: string; 
+  itemName: string;
 
-  @ApiProperty({
-    example: 'High',
-    description: 'Tingkat prioritas perbaikan',
-    enum: ['Low', 'Medium', 'High'],
-  })
+  @ApiProperty({ example: 'Depo Langon', description: 'Lokasi Operasi' })
   @IsString()
   @IsNotEmpty()
-  @IsIn(['Low', 'Medium', 'High'])
-  priority: string; 
+  location: string;
 
-  @ApiPropertyOptional({
-    example: 'Pending',
-    description: 'Status perbaikan',
-    enum: ['Pending', 'In Progress', 'Completed'],
+  @ApiProperty({ example: 'Arduino Nano blank', description: 'Deskripsi kerusakan' })
+  @IsString()
+  @IsNotEmpty()
+  issue: string;
+
+  @ApiPropertyOptional({ 
+    example: 'Barang Diterima', 
+    enum: ['Barang Diterima', 'Sedang Dikerjakan', 'Selesai'] 
   })
   @IsString()
   @IsOptional()
-  @IsIn(['Pending', 'In Progress', 'Completed'])
-  status?: string; 
+  @IsIn(['Barang Diterima', 'Sedang Dikerjakan', 'Selesai'])
+  status?: string;
 
-  @ApiPropertyOptional({
-    example: 'Budi Santoso',
-    description: 'Nama teknisi yang menangani perbaikan',
-  })
+  @ApiProperty({ example: '2025-12-15', description: 'Tanggal barang diterima' })
+  @IsDateString()
+  @IsNotEmpty()
+  entryDate: string;
+
+  @ApiPropertyOptional({ example: '2025-12-15' })
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
+
+  @ApiPropertyOptional({ example: '2025-12-15' })
+  @IsDateString()
+  @IsOptional()
+  completionDate?: string;
+
+  @ApiPropertyOptional({ example: 'Budi Santoso' })
   @IsString()
   @IsOptional()
-  technician?: string; 
+  technician?: string;
 
-  @ApiPropertyOptional({
-    example: 'Menunggu spare part',
-    description: 'Catatan tambahan',
-  })
+  @ApiPropertyOptional({ example: 'Catatan tambahan' })
   @IsString()
   @IsOptional()
-  notes?: string; 
+  notes?: string;
 }
