@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useEffect, useState, type ReactNode } from 'react';
 import backgroundImage from './assets/background.webp'; 
 import ReportModal from './modal/ReportModal';
 import TaskModal from './modal/TaskModal';
@@ -10,6 +10,17 @@ import {
   CheckCircle2, Clock, Package, Edit2, Sun, Moon, Languages,
   Menu, X
 } from 'lucide-react';
+
+import { 
+  reportService, 
+  taskService, 
+  sparepartService, 
+  repairService 
+} from './services';
+
+
+
+
 
 // --- TRANSLATION DICTIONARY ---
 const translations = {
@@ -51,6 +62,59 @@ interface TaskItemProps { title: string; priority: string; progress: number; dat
 interface ActionCardProps {color: string; icon: React.ReactNode; title: string;desc: string; onClick?: () => void;}
 
 const Dashboard: React.FC = () => {
+
+  //backend
+
+  //state
+const [reports, setReports] = useState<any[]>([]);
+const [tasks, setTasks] = useState<any[]>([]);
+const [spareparts, setSpareparts] = useState<any[]>([]);
+const [repairs, setRepairs] = useState<any[]>([]);
+
+const [priorityOrder, setPriorityOrder] = useState<'asc' | 'desc'>('asc');
+const [deadlineOrder, setDeadlineOrder] = useState<'asc' | 'desc'>('asc');
+
+
+// Logika untuk Kolom Prioritas
+const priorityWeight: Record<string, number> = { 'High': 1, 'Medium': 2, 'Low': 3 };
+const sortedByPriority = [...tasks].sort((a, b) => {
+  const weightA = priorityWeight[a.priority] || 99;
+  const weightB = priorityWeight[b.priority] || 99;
+  return priorityOrder === 'asc' ? weightA - weightB : weightB - weightA;
+});
+
+// Logika untuk Kolom Tenggat Waktu
+const sortedByDeadline = [...tasks].sort((a, b) => {
+  const dateA = new Date(a.deadline).getTime();
+  const dateB = new Date(b.deadline).getTime();
+  return deadlineOrder === 'asc' ? dateA - dateB : dateB - dateA;
+});
+
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      // Memanggil semua service sekaligus
+      const [dataReports, dataTasks, dataSpareparts, dataRepairs] = await Promise.all([
+        reportService.findAll(),
+        taskService.findAll(),
+        sparepartService.findAll(),
+        repairService.findAll()
+      ]);
+
+      // Masukkan ke state
+      setReports(dataReports);
+      setTasks(dataTasks);
+      setSpareparts(dataSpareparts);
+      setRepairs(dataRepairs);
+    } catch (error) {
+      console.error("Gagal memuat statistik:", error);
+    }
+  };
+
+  fetchStats();
+}, []);
+
+
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile toggle
   const [lang, setLang] = useState<'ID' | 'EN'>('ID');
@@ -198,46 +262,131 @@ const Dashboard: React.FC = () => {
             <BarChart3 size={24} /> <h2 className="text-lg text-slate-100 uppercase tracking-widest">{t.statsOverview}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-            <StatCard icon={<FileText size={26}/>} iconColor="text-blue-400" label={t.totalReports} value="16" theme={theme} />
-            <StatCard icon={<CheckCircle2 size={26}/>} iconColor="text-emerald-400" label={t.tasksDone} value="2" theme={theme} />
-            <StatCard icon={<Clock size={26}/>} iconColor="text-orange-400" label={t.tasksInProgress} value="7" theme={theme} />
-            <StatCard icon={<Package size={26}/>} iconColor="text-fuchsia-400" label={t.spareParts} value="9" theme={theme} />
-            <StatCard icon={<Wrench size={26}/>} iconColor="text-red-400" label={t.totalRepairs} value="5" theme={theme} />
-          </div>
+  {/* Jumlah Laporan */}
+  <StatCard 
+    label={t.totalReports} 
+    value={reports.length} 
+    icon={<FileText size={26}/>} 
+    iconColor="text-blue-400" 
+    theme={theme} 
+  />
+
+  {/* Tugas Selesai (Filter status 'Completed' dari backend) */}
+  <StatCard 
+    label={t.tasksDone} 
+    value={tasks.filter(t => t.status === 'Completed').length} 
+    icon={<CheckCircle2 size={26}/>} 
+    iconColor="text-emerald-400" 
+    theme={theme} 
+  />
+
+  {/* Tugas Berlangsung (Filter status 'In Progress' dari backend) */}
+  <StatCard 
+    label={t.tasksInProgress} 
+    value={tasks.filter(t => t.status === 'In Progress').length} 
+    icon={<Clock size={26}/>} 
+    iconColor="text-orange-400" 
+    theme={theme} 
+  />
+
+  {/* Suku Cadang (Total item unik di inventory) */}
+  <StatCard 
+    label={t.spareParts} 
+    value={spareparts.length} 
+    icon={<Package size={26}/>} 
+    iconColor="text-fuchsia-400" 
+    theme={theme} 
+  />
+
+  {/* Total Perbaikan */}
+  <StatCard 
+    label={t.totalRepairs} 
+    value={repairs.length} 
+    icon={<Wrench size={26}/>} 
+    iconColor="text-red-400" 
+    theme={theme} 
+  />
+</div>
         </section>
 
         {/* Task Section*/}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
-          {/* Column 1: Priority based Taks*/}
-          <div className={`backdrop-blur-md p-6 rounded-2xl border shadow-xl ${theme === 'light' ? 'bg-white/80 border-slate-200' : 'bg-[#253f4b]/80 border-white/10'}`}>
-            <h3 className="text-md font-bold mb-6 uppercase tracking-tight">{t.priorityTasks}</h3>
-            <div className="space-y-4 max-h-[400px] md:max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
-              <TaskRow title="Kontrol DRF versi Master SPIL and Slave SPIL" priority="Tinggi" progress={50} date="Sabtu, 22 Nov 2025" theme={theme} />
-              <TaskRow title="Kontrol Kalmar DRD" priority="Tinggi" progress={20} date="Sabtu, 22 Nov 2025" theme={theme} />
-              <TaskRow title="Timbangan RS" priority="Tinggi" progress={80} date="Sabtu, 22 Nov 2025" theme={theme} />
-              <TaskRow title="Skun Kabel AKKi" priority="Tinggi" progress={10} date="Minggu, 23 Nov 2025" theme={theme} />
-            </div>
-          </div>
+     
+         {/* Column 1: Priority based Tasks */}
+<div className={`backdrop-blur-md p-6 rounded-2xl border shadow-xl ${theme === 'light' ? 'bg-white/80 border-slate-200' : 'bg-[#253f4b]/80 border-white/10'}`}>
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="text-md font-bold uppercase tracking-tight">{t.priorityTasks}</h3>
+    <button 
+      onClick={() => setPriorityOrder(priorityOrder === 'asc' ? 'desc' : 'asc')}
+      className="text-[10px] font-black uppercase border px-2 py-1 rounded border-white/10 hover:bg-white/5 transition-all"
+    >
+      {/* Menggunakan priorityOrder untuk teks tombol */}
+      {priorityOrder === 'asc' ? '↑ High First' : '↓ Low First'}
+    </button>
+  </div>
+  
+  <div className="space-y-4 max-h-[400px] md:max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
+    {sortedByPriority
+      .filter(task => task.status !== 'Completed')
+      .map(task => (
+        <TaskRow 
+          key={task.id}
+          title={task.title}
+          priority={task.priority === 'High' ? 'Tinggi' : task.priority === 'Medium' ? 'Sedang' : 'Rendah'}
+          progress={task.progress}
+          date={task.deadline}
+          theme={theme}
+        />
+      ))}
+  </div>
+</div>
 
-          {/* Column 2: Deadline Based Tasks*/}
-          <div className={`backdrop-blur-md p-6 rounded-2xl border shadow-xl ${theme === 'light' ? 'bg-white/80 border-slate-200' : 'bg-[#253f4b]/80 border-white/10'}`}>
-            <h3 className="text-md font-bold mb-6 uppercase tracking-tight">{t.dueTasks}</h3>
-            <div className="space-y-4 max-h-[400px] md:max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
-              <TaskRow title="Aplikasi Baca LCD Timbangan DRF" priority="Sedang" progress={70} date="Kamis, 11 Des 2025" theme={theme} />
-              <TaskRow title="Monitoring Pembacaan Sensor via IOT" priority="Rendah" progress={40} date="Senin, 15 Des 2025" theme={theme} />
-              <TaskRow title="Pemeriksaan Genset Depo 4" priority="Sedang" progress={90} date="Selasa, 16 Des 2025" theme={theme} />
-              <TaskRow title="Kalibrasi Load Cell K32" priority="Tinggi" progress={30} date="Rabu, 17 Des 2025" theme={theme} />
-            </div>
-          </div>
+{/* Column 2: Deadline Based Tasks */}
+<div className={`backdrop-blur-md p-6 rounded-2xl border shadow-xl ${theme === 'light' ? 'bg-white/80 border-slate-200' : 'bg-[#253f4b]/80 border-white/10'}`}>
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="text-md font-bold uppercase tracking-tight">{t.dueTasks}</h3>
+    <button 
+      onClick={() => setDeadlineOrder(deadlineOrder === 'asc' ? 'desc' : 'asc')}
+      className="text-[10px] font-black uppercase border px-2 py-1 rounded border-white/10 hover:bg-white/5 transition-all"
+    >
+      {/* PERBAIKAN: Menggunakan deadlineOrder, bukan sortOrder */}
+      {deadlineOrder === 'asc' ? '↑ Oldest' : '↓ Newest'}
+    </button>
+  </div>
+  <div className="space-y-4 max-h-[400px] md:max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
+    {/* Pastikan mapping menggunakan hasil sort deadline */}
+    {sortedByDeadline
+      .filter(task => task.status !== 'Completed')
+      .map(task => (
+        <TaskRow 
+          key={task.id}
+          title={task.title}
+          priority={task.priority === 'High' ? 'Tinggi' : task.priority === 'Medium' ? 'Sedang' : 'Rendah'}
+          progress={task.progress}
+          date={task.deadline}
+          theme={theme}
+        />
+      ))}
+  </div>
+</div>
           
           {/* Column 3: Done Tasks */}
           <div className={`backdrop-blur-md p-6 rounded-2xl border shadow-xl ${theme === 'light' ? 'bg-white/80 border-slate-200' : 'bg-[#253f4b]/80 border-white/10'}`}>
-            <h3 className="text-md font-bold mb-6 uppercase tracking-tight text-slate-100">{t.completedTasks}</h3>
-            <div className="space-y-4">
-              <DoneItem title="Program Database BBM" desc="Revisi program database RFID BBM. Pindah datasheet di Spreadsheet" theme={theme} />
-              <DoneItem title="Integrasi Program BBM IoT" desc="Integrasi Program BBM - Database Spreadsheet - Website" theme={theme} />
-            </div>
-          </div>
+  <h3 className="text-md font-bold mb-6 uppercase tracking-tight text-slate-100">{t.completedTasks}</h3>
+  <div className="space-y-4">
+    {tasks
+      .filter(task => task.status === 'Completed')
+      .map(task => (
+        <DoneItem 
+          key={task.id}
+          title={task.title}
+          desc={task.description}
+          theme={theme} 
+        />
+      ))}
+  </div>
+</div>
+
         </section>
       </main>
         <ReportModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} 
