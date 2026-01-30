@@ -2,6 +2,8 @@ import React, { useState, type ReactNode } from 'react';
 import backgroundImage from './assets/background.webp'; 
 import ReportModal from './modal/ReportModal';
 import TaskModal from './modal/TaskModal';
+import OrderSparepartModal from './modal/OrderSparepartModal';
+import RepairInputModal from './modal/RepairInputModal';
 import { 
   LayoutDashboard, FileText, ClipboardList, Settings, 
   Wrench, Monitor, ChevronDown, Plus, BarChart3, 
@@ -57,6 +59,8 @@ const Dashboard: React.FC = () => {
   // Modal Trigger
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isRepairModalOpen, setIsRepairModalOpen] = useState(false);
 
   const t = translations[lang];
   const toggleMenu = (menu: string) => setActiveMenu(activeMenu === menu ? null : menu);
@@ -183,8 +187,8 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
             <ActionCard color="bg-blue-600" icon={<FileText size={32}/>} title={t.newFieldReport} desc={t.recordWork} onClick={() => setIsModalOpen(true)} />
             <ActionCard color="bg-emerald-600" icon={<Edit2 size={32}/>} title={t.newTask} desc={t.planWork} onClick={() => setIsTaskModalOpen(true)}/>
-            <ActionCard color="bg-fuchsia-600" icon={<Wrench size={32}/>} title={t.orderParts} desc={t.addParts} />
-            <ActionCard color="bg-orange-600" icon={<ClipboardList size={32}/>} title={t.newRepair} desc={t.inputRepair} />
+            <ActionCard color="bg-fuchsia-600" icon={<Wrench size={32}/>} title={t.orderParts} desc={t.addParts} onClick={() => setIsOrderModalOpen(true)}/>
+            <ActionCard color="bg-orange-600" icon={<ClipboardList size={32}/>} title={t.newRepair} desc={t.inputRepair} onClick={() => setIsRepairModalOpen(true)} />
           </div>
         </section>
 
@@ -240,6 +244,12 @@ const Dashboard: React.FC = () => {
         theme={theme} lang={lang} />
 
         <TaskModal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} 
+        theme={theme} lang={lang} />
+
+        <OrderSparepartModal isOpen={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)} 
+        theme={theme} lang={lang} />
+
+        <RepairInputModal isOpen={isRepairModalOpen} onClose={() => setIsRepairModalOpen(false)} 
         theme={theme} lang={lang} />
     </div>
   );
