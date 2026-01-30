@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { TasksService } from '../services/tasks.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
+import { UpdateProgressDto } from '../dto/update-progress.dto';
+import { UpdateTaskDto } from '../dto/update-task.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -16,8 +18,21 @@ export class TasksController {
     return await this.tasksService.findAll();
   }
 
-  @Patch(':id/progress')
-  async updateProgress(@Param('id') id: string, @Body('progress') progress: number) {
-    return await this.tasksService.updateProgress(id, progress);
+  @Patch(':id') 
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTaskDto) {
+    return await this.tasksService.update(id, dto);
+  }
+
+  @Patch(':id/progress') 
+  async updateProgress(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Body() dto: UpdateProgressDto
+  ) {
+    return await this.tasksService.updateProgress(id, dto.progress); 
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.tasksService.remove(id);
   }
 }
