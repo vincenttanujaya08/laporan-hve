@@ -1,35 +1,74 @@
 import React from 'react';
 import { X, Calendar, Clock, ChevronDown } from 'lucide-react';
+// Import the interface if placed in a separate file, otherwise define here temporarily
+import type { ReportData } from '../page/ReportPage'; 
 
+// --- MODAL TRANSLATIONS (Kept same as before) ---
 const modalTranslations = {
   ID: {
-    title: "Buat Laporan Lapangan Baru", date: "Tanggal", location: "Lokasi",
-    project: "Nama Proyek", activity: "Jenis Kegiatan", unit: "Nama Unit",
-    start: "Jam Mulai", end: "Jam Selesai", desc: "Deskripsi",
-    notes: "Catatan", cancel: "Batal", save: "Simpan Laporan",
+    titleNew: "Buat Laporan Lapangan Baru",
+    titleEdit: "Edit Laporan Lapangan", // Added edit title
+    date: "Tanggal",
+    location: "Lokasi",
+    project: "Nama Proyek",
+    activity: "Jenis Kegiatan",
+    unit: "Nama Unit",
+    start: "Jam Mulai",
+    end: "Jam Selesai",
+    desc: "Deskripsi",
+    notes: "Catatan",
+    cancel: "Batal",
+    save: "Simpan Laporan",
     placeholders: {
-      location: "Contoh: Jakarta Pusat", project: "Contoh: Instalasi Jaringan",
-      activity: "Pilih Kegiatan", unit: "Pilih Unit",
-      desc: "Jelaskan pekerjaan...", notes: "Kendala, material, dll..."
+      location: "Contoh: Jakarta Pusat",
+      project: "Contoh: Instalasi Jaringan",
+      activity: "Pilih Kegiatan",
+      unit: "Pilih Unit",
+      desc: "Jelaskan pekerjaan...",
+      notes: "Kendala, material, dll..."
     },
     options: {
-      survey: "Survey", install: "Instalasi",
-      maint: "Maintenance", repair: "Perbaikan",
-      gen: "Generator",rs: "Reach Stacker"
+      survey: "Survey",
+      instalasi: "Instalasi",
+      maintenance: "Maintenance",
+      perbaikan: "Perbaikan",
+      gen: "Generator",
+      rs: "Reach Stacker",
+      trafo: "Trafo",
+      panel: "Panel"
     }
   },
   EN: {
-    title: "Create New Field Report", date: "Date", location: "Location",
-    project: "Project Name", activity: "Activity Type", unit: "Unit Name",
-    start: "Start Time", end: "End Time", desc: "Description",
-    notes: "Notes", cancel: "Cancel", save: "Save Report",
+    titleNew: "Create New Field Report",
+    titleEdit: "Edit Field Report", // Added edit title
+    date: "Date",
+    location: "Location",
+    project: "Project Name",
+    activity: "Activity Type",
+    unit: "Unit Name",
+    start: "Start Time",
+    end: "End Time",
+    desc: "Description",
+    notes: "Notes",
+    cancel: "Cancel",
+    save: "Save Report",
     placeholders: {
-      location: "Example: Central Jakarta", project: "Example: Network Installation", activity: "Select Activity",
-      unit: "Select Unit", desc: "Describe the work...", notes: "Obstacles, materials, etc..."
+      location: "Example: Central Jakarta",
+      project: "Example: Network Installation",
+      activity: "Select Activity",
+      unit: "Select Unit",
+      desc: "Describe the work...",
+      notes: "Obstacles, materials, etc..."
     },
     options: {
-      survey: "Survey", install: "Installation", maint: "Maintenance",
-      repair: "Repair", gen: "Generator",rs: "Reach Stacker"
+      survey: "Survey",
+      instalasi: "Installation",
+      maintenance: "Maintenance",
+      perbaikan: "Repair",
+      gen: "Generator",
+      rs: "Reach Stacker",
+      trafo: "Transformer",
+      panel: "Panel"
     }
   }
 };
@@ -39,63 +78,71 @@ interface ReportModalProps {
   onClose: () => void;
   theme: 'light' | 'dark' | 'system';
   lang: 'ID' | 'EN';
+  initialData?: ReportData | null;
 }
 
-const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang }) => {
+const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang, initialData }) => {
   if (!isOpen) return null;
 
-  const mt = modalTranslations[lang]
-  const modalBg = theme === 'light' ? 'bg-white' : 'bg-[#161b26]';
+  const mt = modalTranslations[lang];
+  const isEditMode = !!initialData;
+  
+  const modalBg = theme === 'light' ? 'bg-white' : 'bg-[#1e1e1e]';
   const inputBg = theme === 'light' ? 'bg-slate-50' : 'bg-[#121212]';
   const textColor = theme === 'light' ? 'text-slate-900' : 'text-slate-100';
-  const labelColor = theme === 'light' ? 'text-slate-500' : 'text-white-400';
+  const labelColor = theme === 'light' ? 'text-slate-500' : 'text-slate-100';
   const borderColor = theme === 'light' ? 'border-slate-200' : 'border-white/5';
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-10 bg-black/10 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-10 bg-black/80 backdrop-blur-sm">
       <div className={`relative w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border ${modalBg} ${textColor} ${borderColor}`}>
         
         <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-emerald-500 to-blue-600 opacity-40 z-10" />
 
         {/* Header */}
         <div className="flex items-center justify-between p-5 md:p-6 border-b border-white/5 shrink-0">
-          <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">{mt.title}</h2>
+          <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">{isEditMode ? mt.titleEdit : mt.titleNew}</h2>
           <button onClick={onClose} className="p-1 hover:bg-white/5 rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
 
         {/* Form Body */}
-        <form className="flex-1 overflow-y-auto p-5 md:p-8 space-y-6 custom-modal-scroll">
+        <form className="flex-1 overflow-y-auto p-5 md:p-8 space-y-6 custom-modal-scroll" onSubmit={(e) => { e.preventDefault(); onClose(); /* Add actual submit logic here */}}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
             
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.date} *</label>
               <div className="relative">
-                <input type="date" className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 transition-all`} style={{ colorScheme: theme === 'light' ? 'light' : 'dark' }} />
+                <input 
+                  type="date" 
+                  defaultValue={initialData?.date}
+                  className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 transition-all`} 
+                  style={{ colorScheme: theme === 'light' ? 'light' : 'dark' }} 
+                />
                 <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.location} *</label>
-              <input type="text" placeholder={mt.placeholders.location} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500`} />
+              <input type="text" defaultValue={initialData?.location} placeholder={mt.placeholders.location} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500`} />
             </div>
 
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.project} *</label>
-              <input type="text" placeholder={mt.placeholders.project} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500`} />
+              <input type="text" defaultValue={initialData?.project} placeholder={mt.placeholders.project} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500`} />
             </div>
 
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.activity} *</label>
               <div className="relative">
-                <select className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 cursor-pointer`}>
-                  <option value="" disabled selected>{mt.placeholders.activity}</option>
+                <select defaultValue={initialData?.activity.toLowerCase() || ""} className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 cursor-pointer`}>
+                  <option value="" disabled>{mt.placeholders.activity}</option>
                   <option value="survey">{mt.options.survey}</option>
-                  <option value="instalasi">{mt.options.install}</option>
-                  <option value="maintenance">{mt.options.maint}</option>
-                  <option value="perbaikan">{mt.options.repair}</option>
+                  <option value="instalasi">{mt.options.instalasi}</option>
+                  <option value="maintenance">{mt.options.maintenance}</option>
+                  <option value="perbaikan">{mt.options.perbaikan}</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
@@ -104,10 +151,12 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang 
             <div className="space-y-2 md:col-span-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.unit} *</label>
               <div className="relative">
-                <select className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 cursor-pointer`}>
-                  <option value="" disabled selected>{mt.placeholders.unit}</option>
+                <select defaultValue={initialData?.unit.toLowerCase() || ""} className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500 cursor-pointer`}>
+                  <option value="" disabled>{mt.placeholders.unit}</option>
                   <option value="gen">{mt.options.gen}</option>
                   <option value="rs">{mt.options.rs}</option>
+                  <option value="trafo">{mt.options.trafo}</option>
+                  <option value="panel">{mt.options.panel}</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
@@ -116,7 +165,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang 
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.start}</label>
               <div className="relative">
-                <input type="time" className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500`} />
+                <input type="time" defaultValue={initialData?.startTime} className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500`} />
                 <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
             </div>
@@ -124,19 +173,19 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, theme, lang 
             <div className="space-y-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.end}</label>
               <div className="relative">
-                <input type="time" className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500`} />
+                <input type="time" defaultValue={initialData?.endTime} className={`w-full p-3 rounded-lg border text-sm appearance-none outline-none ${borderColor} ${inputBg} focus:ring-1 focus:ring-emerald-500`} />
                 <Clock className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.desc} *</label>
-              <textarea rows={3} placeholder={mt.placeholders.desc} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none`} />
+              <textarea rows={3} defaultValue={initialData?.description} placeholder={mt.placeholders.desc} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none`} />
             </div>
 
             <div className="space-y-2 md:col-span-2 pb-4">
               <label className={`text-xs font-bold uppercase tracking-widest ${labelColor}`}>{mt.notes}</label>
-              <textarea rows={2} placeholder={mt.placeholders.notes} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none`} />
+              <textarea rows={2} defaultValue={initialData?.notes} placeholder={mt.placeholders.notes} className={`w-full p-3 rounded-lg border text-sm ${borderColor} ${inputBg} focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none`} />
             </div>
           </div>
         </form>
